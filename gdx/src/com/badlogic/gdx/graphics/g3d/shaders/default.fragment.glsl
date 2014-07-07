@@ -37,6 +37,10 @@ varying MED vec2 v_texCoords0;
 uniform vec4 u_diffuseColor;
 #endif
 
+#ifdef partialColorFlag
+uniform vec2 u_partialColor;
+#endif //partialColorFlag
+
 #ifdef diffuseTextureFlag
 uniform sampler2D u_diffuseTexture;
 #endif
@@ -105,7 +109,14 @@ void main() {
 	#if defined(diffuseTextureFlag) && defined(diffuseColorFlag) && defined(colorFlag)
 		vec4 diffuse = texture2D(u_diffuseTexture, v_texCoords0) * u_diffuseColor * v_color;
 	#elif defined(diffuseTextureFlag) && defined(diffuseColorFlag)
-		vec4 diffuse = texture2D(u_diffuseTexture, v_texCoords0) * u_diffuseColor;
+		vec4 diffuse = texture2D(u_diffuseTexture, v_texCoords0);
+	#ifdef partialColorFlag
+		if (v_texCoords0.x < u_partialColor.x) {
+			diffuse = diffuse * u_diffuseColor;
+		}
+	#else
+		diffuse = diffuse * u_diffuseColor;
+	#endif
 	#elif defined(diffuseTextureFlag) && defined(colorFlag)
 		vec4 diffuse = texture2D(u_diffuseTexture, v_texCoords0) * v_color;
 	#elif defined(diffuseTextureFlag)
