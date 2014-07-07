@@ -29,6 +29,10 @@ attribute vec2 a_texCoord0;
 varying vec2 v_texCoords0;
 #endif // textureFlag
 
+#ifdef UVOffsetFlag
+uniform vec2 u_uvOffset;
+#endif // UVOffsetFlag
+
 #ifdef boneWeight0Flag
 #define boneWeightsFlag
 attribute vec2 a_boneWeight0;
@@ -179,6 +183,11 @@ void main() {
 	#ifdef textureFlag
 		v_texCoords0 = a_texCoord0;
 	#endif // textureFlag
+
+	#ifdef UVOffsetFlag
+		v_texCoords0.x += u_uvOffset.x;
+		v_texCoords0.y += u_uvOffset.y;
+	#endif // UVOffsetFlag
 	
 	#if defined(colorFlag)
 		v_color = a_color;
