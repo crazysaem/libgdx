@@ -133,7 +133,12 @@ public class MessageDispatcher {
 			telegram.setTimestamp(currentTime + (long)(delay * NANOS_PER_SEC), timeGranularity);
 
 			// Put it in the queue
-			queue.add(telegram);
+			if (!queue.add(telegram))
+			{
+				Telegram lastRemoved;
+				if ((lastRemoved = queue.getLastRemoved()) != null)
+					pool.free(lastRemoved);
+			}
 
 			if (debugEnabled) {
 				Gdx.app.log(LOG_TAG, "Delayed telegram from " + sender + " recorded at time " + getCurrentTime() + " for " + receiver

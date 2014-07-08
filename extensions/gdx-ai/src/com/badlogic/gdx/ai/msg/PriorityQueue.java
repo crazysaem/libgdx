@@ -62,7 +62,9 @@ public class PriorityQueue<E extends Comparable<E>> {
 	private Object[] queue;
 
 	/** A set used to check elements'uniqueness (if enabled). */
-	private ObjectSet<E> set;
+	//private ObjectSet<E> set;
+
+	private E lastRemoved;
 
 	/** A flag indicating whether elements inserted into the queue must be unique. */
 	private boolean uniqueness;
@@ -82,7 +84,7 @@ public class PriorityQueue<E extends Comparable<E>> {
 	 * @param initialCapacity the initial capacity for this priority queue */
 	public PriorityQueue (int initialCapacity) {
 		this.queue = new Object[initialCapacity];
-		this.set = new ObjectSet<E>(initialCapacity);
+		//this.set = new ObjectSet<E>(initialCapacity);
 	}
 
 	/** Returns a value indicating whether only unique elements are allowed to be inserted. */
@@ -95,6 +97,15 @@ public class PriorityQueue<E extends Comparable<E>> {
 		this.uniqueness = uniqueness;
 	}
 
+	public int getPosOf(E e) {
+		int hashCode = e.hashCode();
+		for (int i = 0; i < size; i++)
+			if (queue[i].hashCode() == hashCode)
+				return i;
+
+		return -1;
+	}
+
 	/** Inserts the specified element into this priority queue.
 	 * 
 	 * @return true if the element was added to this queue, else false
@@ -103,7 +114,12 @@ public class PriorityQueue<E extends Comparable<E>> {
 	 * @throws NullPointerException if the specified element is null */
 	public boolean add (E e) {
 		if (e == null) throw new NullPointerException();
-		if (uniqueness && set.contains(e)) return false;
+		int pos;
+		if (uniqueness && ((pos = getPosOf(e)) >= 0)) {
+			lastRemoved = (E)queue[pos];
+			queue[pos] = e;
+			return false;
+		}
 		int i = size;
 		if (i >= queue.length) growToSize(i + 1);
 		size = i + 1;
@@ -111,8 +127,13 @@ public class PriorityQueue<E extends Comparable<E>> {
 			queue[0] = e;
 		else
 			siftUp(i, e);
-		if (uniqueness) set.add(e);
+		//if (uniqueness) set.add(e);
 		return true;
+	}
+
+	public E getLastRemoved()
+	{
+		return lastRemoved;
 	}
 
 	/** Retrieves, but does not remove, the head of this queue. If this queue is empty {@code null} is returned.
@@ -143,7 +164,7 @@ public class PriorityQueue<E extends Comparable<E>> {
 		for (int i = 0; i < size; i++)
 			queue[i] = null;
 		size = 0;
-		set.clear();
+		//set.clear();
 	}
 
 	/** Retrieves and removes the head of this queue, or returns {@code null} if this queue is empty.
@@ -157,7 +178,7 @@ public class PriorityQueue<E extends Comparable<E>> {
 		E x = (E)queue[s];
 		queue[s] = null;
 		if (s != 0) siftDown(0, x);
-		if (uniqueness) set.remove(result);
+		//if (uniqueness) set.remove(result);
 		return result;
 	}
 
