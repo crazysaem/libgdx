@@ -80,6 +80,8 @@ public abstract class GLTexture implements Disposable {
 	/** Binds the texture to the given texture unit. Sets the currently active texture unit via {@link GL20#glActiveTexture(int)}.
 	 * @param unit the unit (0 to MAX_TEXTURE_UNITS). */
 	public void bind (int unit) {
+		//Workaround for Smartphones with ADRENO 200/205 GPUs, see http://androidblog.reindustries.com/hack-bad-gpu-fix-not-using-correct-texture-opengl/
+		Gdx.gl.glBindTexture(glTarget, 0);
 		Gdx.gl.glActiveTexture(GL20.GL_TEXTURE0 + unit);
 		Gdx.gl.glBindTexture(glTarget, glHandle);
 	}
