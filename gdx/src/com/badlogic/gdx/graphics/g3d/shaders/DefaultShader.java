@@ -27,13 +27,7 @@ import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.Shader;
-import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
-import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
-import com.badlogic.gdx.graphics.g3d.attributes.CubemapAttribute;
-import com.badlogic.gdx.graphics.g3d.attributes.DepthTestAttribute;
-import com.badlogic.gdx.graphics.g3d.attributes.FloatAttribute;
-import com.badlogic.gdx.graphics.g3d.attributes.IntAttribute;
-import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
+import com.badlogic.gdx.graphics.g3d.attributes.*;
 import com.badlogic.gdx.graphics.g3d.environment.AmbientCubemap;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.environment.PointLight;
@@ -99,6 +93,7 @@ public class DefaultShader extends BaseShader {
 		public final static Uniform reflectionColor = new Uniform("u_reflectionColor", ColorAttribute.Reflection);
 		public final static Uniform normalTexture = new Uniform("u_normalTexture", TextureAttribute.Normal);
 		public final static Uniform alphaTest = new Uniform("u_alphaTest");
+		public final static Uniform uvOffset = new Uniform("u_uvOffset", UVOffsetAttribute.Type);
 
 		public final static Uniform ambientCube = new Uniform("u_ambientCubemap");
 		public final static Uniform dirLights = new Uniform("u_dirLights");
@@ -451,6 +446,7 @@ public class DefaultShader extends BaseShader {
 	public final int u_reflectionColor;
 	public final int u_normalTexture;
 	public final int u_alphaTest;
+	public final int u_uvOffset;
 	// Lighting uniforms
 	protected final int u_ambientCubemap;
 	protected final int u_environmentCubemap;
@@ -559,6 +555,7 @@ public class DefaultShader extends BaseShader {
 		u_reflectionColor = register(Inputs.reflectionColor, Setters.reflectionColor);
 		u_normalTexture = register(Inputs.normalTexture, Setters.normalTexture);
 		u_alphaTest = register(Inputs.alphaTest);
+		u_uvOffset = register(Inputs.uvOffset);
 
 		u_ambientCubemap = lighting ? register(Inputs.ambientCube, new Setters.ACubemap(config.numDirectionalLights,
 			config.numPointLights)) : -1;
@@ -650,6 +647,8 @@ public class DefaultShader extends BaseShader {
 			prefix += "#define " + FloatAttribute.ShininessAlias + "Flag\n";
 		if ((mask & FloatAttribute.AlphaTest) == FloatAttribute.AlphaTest)
 			prefix += "#define " + FloatAttribute.AlphaTestAlias + "Flag\n";
+		if ((mask & UVOffsetAttribute.Type) == UVOffsetAttribute.Type)
+			prefix += "#define " + UVOffsetAttribute.UVOffsetAlias + "Flag\n";
 		if (renderable.bones != null && config.numBones > 0) prefix += "#define numBones " + config.numBones + "\n";
 		return prefix;
 	}
@@ -737,6 +736,9 @@ public class DefaultShader extends BaseShader {
 				depthRangeNear = dta.depthRangeNear;
 				depthRangeFar = dta.depthRangeFar;
 				depthMask = dta.depthMask;
+			} else if ((t & UVOffsetAttribute.Type) == UVOffsetAttribute.Type) {
+				UVOffsetAttribute uv = (UVOffsetAttribute) attr;
+				set(u_uvOffset, uv.u, uv.v);
 			} else if (!config.ignoreUnimplemented) throw new GdxRuntimeException("Unknown material attribute: " + attr.toString());
 		}
 
