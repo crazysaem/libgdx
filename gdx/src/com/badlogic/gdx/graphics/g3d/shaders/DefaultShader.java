@@ -94,6 +94,7 @@ public class DefaultShader extends BaseShader {
 		public final static Uniform normalTexture = new Uniform("u_normalTexture", TextureAttribute.Normal);
 		public final static Uniform alphaTest = new Uniform("u_alphaTest");
 		public final static Uniform uvOffset = new Uniform("u_uvOffset", UVOffsetAttribute.Type);
+		public final static Uniform partialColor = new Uniform("u_partialColor", PartialColorAttribute.Type);
 
 		public final static Uniform ambientCube = new Uniform("u_ambientCubemap");
 		public final static Uniform dirLights = new Uniform("u_dirLights");
@@ -447,6 +448,7 @@ public class DefaultShader extends BaseShader {
 	public final int u_normalTexture;
 	public final int u_alphaTest;
 	public final int u_uvOffset;
+	public final int u_partialColor;
 	// Lighting uniforms
 	protected final int u_ambientCubemap;
 	protected final int u_environmentCubemap;
@@ -556,6 +558,7 @@ public class DefaultShader extends BaseShader {
 		u_normalTexture = register(Inputs.normalTexture, Setters.normalTexture);
 		u_alphaTest = register(Inputs.alphaTest);
 		u_uvOffset = register(Inputs.uvOffset);
+		u_partialColor = register(Inputs.partialColor);
 
 		u_ambientCubemap = lighting ? register(Inputs.ambientCube, new Setters.ACubemap(config.numDirectionalLights,
 			config.numPointLights)) : -1;
@@ -649,6 +652,8 @@ public class DefaultShader extends BaseShader {
 			prefix += "#define " + FloatAttribute.AlphaTestAlias + "Flag\n";
 		if ((mask & UVOffsetAttribute.Type) == UVOffsetAttribute.Type)
 			prefix += "#define " + UVOffsetAttribute.UVOffsetAlias + "Flag\n";
+		if ((mask & PartialColorAttribute.Type) == PartialColorAttribute.Type)
+			prefix += "#define " + PartialColorAttribute.PartialColorAlias + "Flag\n";
 		if (renderable.bones != null && config.numBones > 0) prefix += "#define numBones " + config.numBones + "\n";
 		return prefix;
 	}
@@ -737,8 +742,11 @@ public class DefaultShader extends BaseShader {
 				depthRangeFar = dta.depthRangeFar;
 				depthMask = dta.depthMask;
 			} else if ((t & UVOffsetAttribute.Type) == UVOffsetAttribute.Type) {
-				UVOffsetAttribute uv = (UVOffsetAttribute) attr;
+				UVOffsetAttribute uv = (UVOffsetAttribute)attr;
 				set(u_uvOffset, uv.u, uv.v);
+			} else if ((t & PartialColorAttribute.Type) == PartialColorAttribute.Type) {
+				PartialColorAttribute partialColor = (PartialColorAttribute)attr;
+				set(u_partialColor, partialColor.x, partialColor.y);
 			} else if (!config.ignoreUnimplemented) throw new GdxRuntimeException("Unknown material attribute: " + attr.toString());
 		}
 
