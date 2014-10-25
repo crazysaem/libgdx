@@ -124,6 +124,7 @@
 		<include name="graphics/g3d/attributes/DepthTestAttribute.java"/>
 		<include name="graphics/g3d/attributes/FloatAttribute.java"/>
 		<include name="graphics/g3d/attributes/IntAttribute.java"/>
+		<include name="graphics/g3d/attributes/PartialColorAttribute.java"/>
 		<include name="graphics/g3d/attributes/TextureAttribute.java"/>
 		
 	<!-- graphics/g3d/decals -->
