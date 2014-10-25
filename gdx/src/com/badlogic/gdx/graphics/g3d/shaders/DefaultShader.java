@@ -27,13 +27,7 @@ import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.Shader;
-import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
-import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
-import com.badlogic.gdx.graphics.g3d.attributes.CubemapAttribute;
-import com.badlogic.gdx.graphics.g3d.attributes.DepthTestAttribute;
-import com.badlogic.gdx.graphics.g3d.attributes.FloatAttribute;
-import com.badlogic.gdx.graphics.g3d.attributes.IntAttribute;
-import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
+import com.badlogic.gdx.graphics.g3d.attributes.*;
 import com.badlogic.gdx.graphics.g3d.environment.AmbientCubemap;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.environment.PointLight;
@@ -103,6 +97,7 @@ public class DefaultShader extends BaseShader {
 		public final static Uniform normalTexture = new Uniform("u_normalTexture", TextureAttribute.Normal);
 		public final static Uniform normalUVTransform = new Uniform("u_normalUVTransform", TextureAttribute.Normal);
 		public final static Uniform alphaTest = new Uniform("u_alphaTest");
+		public final static Uniform partialColor = new Uniform("u_partialColor", PartialColorAttribute.Type);
 
 		public final static Uniform ambientCube = new Uniform("u_ambientCubemap");
 		public final static Uniform dirLights = new Uniform("u_dirLights");
@@ -371,6 +366,7 @@ public class DefaultShader extends BaseShader {
 	public final int u_normalTexture;
 	public final int u_normalUVTransform;
 	public final int u_alphaTest;
+	public final int u_partialColor;
 	// Lighting uniforms
 	protected final int u_ambientCubemap;
 	protected final int u_environmentCubemap;
@@ -483,6 +479,7 @@ public class DefaultShader extends BaseShader {
 		u_normalTexture = register(Inputs.normalTexture, Setters.normalTexture);
 		u_normalUVTransform = register(Inputs.normalUVTransform, Setters.normalUVTransform);
 		u_alphaTest = register(Inputs.alphaTest);
+		u_partialColor = register(Inputs.partialColor);
 
 		u_ambientCubemap = lighting ? register(Inputs.ambientCube, new Setters.ACubemap(config.numDirectionalLights,
 			config.numPointLights)) : -1;
@@ -573,6 +570,8 @@ public class DefaultShader extends BaseShader {
 			prefix += "#define " + FloatAttribute.ShininessAlias + "Flag\n";
 		if ((mask & FloatAttribute.AlphaTest) == FloatAttribute.AlphaTest)
 			prefix += "#define " + FloatAttribute.AlphaTestAlias + "Flag\n";
+		if ((mask & PartialColorAttribute.Type) == PartialColorAttribute.Type)
+			prefix += "#define " + PartialColorAttribute.PartialColorAlias + "Flag\n";
 		if (renderable.bones != null && config.numBones > 0) prefix += "#define numBones " + config.numBones + "\n";
 		return prefix;
 	}
@@ -660,6 +659,9 @@ public class DefaultShader extends BaseShader {
 				depthRangeNear = dta.depthRangeNear;
 				depthRangeFar = dta.depthRangeFar;
 				depthMask = dta.depthMask;
+			} else if ((t & PartialColorAttribute.Type) == PartialColorAttribute.Type) {
+				PartialColorAttribute partialColor = (PartialColorAttribute) attr;
+				set(u_partialColor, partialColor.x, partialColor.y);
 			} else if (!config.ignoreUnimplemented) throw new GdxRuntimeException("Unknown material attribute: " + attr.toString());
 		}
 

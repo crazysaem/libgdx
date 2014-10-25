@@ -44,6 +44,10 @@ varying MED vec2 v_specularUV;
 uniform vec4 u_diffuseColor;
 #endif
 
+#ifdef partialColorFlag
+uniform vec2 u_partialColor;
+#endif //partialColorFlag
+
 #ifdef diffuseTextureFlag
 uniform sampler2D u_diffuseTexture;
 #endif
@@ -112,7 +116,14 @@ void main() {
 	#if defined(diffuseTextureFlag) && defined(diffuseColorFlag) && defined(colorFlag)
 		vec4 diffuse = texture2D(u_diffuseTexture, v_diffuseUV) * u_diffuseColor * v_color;
 	#elif defined(diffuseTextureFlag) && defined(diffuseColorFlag)
-		vec4 diffuse = texture2D(u_diffuseTexture, v_diffuseUV) * u_diffuseColor;
+		vec4 diffuse = texture2D(u_diffuseTexture, v_diffuseUV);
+		#ifdef partialColorFlag
+            if (v_diffuseUV.x < u_partialColor.x) {
+                diffuse = diffuse * u_diffuseColor;
+            }
+		#else
+		    diffuse = diffuse * u_diffuseColor;
+		#endif
 	#elif defined(diffuseTextureFlag) && defined(colorFlag)
 		vec4 diffuse = texture2D(u_diffuseTexture, v_diffuseUV) * v_color;
 	#elif defined(diffuseTextureFlag)
